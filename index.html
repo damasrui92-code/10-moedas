@@ -1,160 +1,54 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-PT">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>10 Moedas V8 Finance Pro</title>
-<style>
-body{font-family:Arial;background:#f4f6f9;max-width:1200px;margin:auto;padding:15px}
-.card{background:#fff;padding:15px;margin:10px 0;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,.1)}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
-input,select,button{padding:10px;margin:4px;border-radius:8px}
-.progress{background:#ddd;height:18px;border-radius:9px;overflow:hidden}
-.bar{background:#4caf50;height:100%}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dez Moedas</title>
+
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<h1>💰 10 Moedas V8 Finance Pro</h1>
 
-<div class="card">
-<h2>💸 Nova Receita</h2>
-<input id="income" type="number" placeholder="Valor">
-<select id="incomeType">
-<option>Salário</option><option>Horas Extra</option><option>Subsídio</option><option>Outro</option>
-</select>
-<button onclick="addIncome()">Receber</button>
-<div id="transferBox"></div>
-</div>
+    <header class="header">
+        <h1>💰 Dez Moedas</h1>
+        <p>O teu sistema financeiro pessoal</p>
+    </header>
 
-<div class="card">
-<h2>➖ Nova Despesa</h2>
-<input id="expenseValue" type="number" placeholder="Valor">
-<input id="expenseDesc" placeholder="Descrição">
-<select id="expenseCat">
-<option>Casa</option><option>Emergência</option><option>Investimento</option>
-<option>Mobilidade</option><option>Alimentação</option><option>Rui</option><option>Oportunidades</option>
-</select>
-<button onclick="addExpense()">Guardar</button>
-</div>
+    <main>
 
-<div class="card"><h2>📊 Dashboard</h2><div id="dashboard"></div></div>
+        <section class="card dashboard">
+            <h2>📊 Dashboard</h2>
 
-<div class="card">
-<h2>🤔 Posso Comprar Isto?</h2>
-<input id="buyPrice" type="number" placeholder="Preço">
-<select id="buyCat">
-<option>Mobilidade</option><option>Alimentação</option><option>Rui</option><option>Oportunidades</option>
-</select>
-<button onclick="canBuy()">Verificar</button>
-<p id="buyResult"></p>
-</div>
+            <div class="stats">
+                <div class="stat-box">
+                    <span>Receitas</span>
+                    <strong id="incomeTotal">0 €</strong>
+                </div>
 
-<div class="card">
-<h2>🎯 Objetivos</h2>
-<div>🛡️ Emergência <span id="eTxt"></span><div class="progress"><div id="eBar" class="bar"></div></div></div><br>
-<div>🎙️ Estúdio <span id="sTxt"></span><div class="progress"><div id="sBar" class="bar"></div></div></div><br>
-<div>🎯 Património <span id="pTxt"></span><div class="progress"><div id="pBar" class="bar"></div></div></div>
-</div>
+                <div class="stat-box">
+                    <span>Despesas</span>
+                    <strong id="expenseTotal">0 €</strong>
+                </div>
 
-<div class="card">
-<button onclick="closeMonth()">📅 Fechar Mês</button>
-<button onclick="exportBackup()">📤 Exportar Backup</button>
-<input type="file" id="importFile" onchange="importBackup()">
-</div>
+                <div class="stat-box">
+                    <span>Património</span>
+                    <strong id="netWorth">0 €</strong>
+                </div>
+            </div>
+        </section>
 
-<div class="card"><h2>📚 Histórico Mensal</h2><ul id="history"></ul></div>
+        <section class="card">
+            <h2>💳 Carteiras</h2>
 
-<script>
-let db=JSON.parse(localStorage.getItem("v8finance")||'{"income":0,"spent":{},"budgets":{},"history":[],"emergency":500,"studio":0,"wealth":500}');
+            <div id="walletList"></div>
+        </section>
 
-function save(){localStorage.setItem("v8finance",JSON.stringify(db));render();}
+    </main>
 
-function addIncome(){
- let income=parseFloat(document.getElementById("income").value||0);
- db.income+=income;
+    <script src="js/config.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/wallets.js"></script>
+    <script src="js/app.js"></script>
 
- let remaining=Math.max(0,income-650);
-
- let emergencyPct = db.emergency>=5000 ? 0 : 0.15;
- let investPct = db.emergency>=5000 ? 0.20 : 0.05;
-
- db.budgets={
- Casa:650,
- Emergência:remaining*emergencyPct,
- Investimento:remaining*investPct,
- Mobilidade:remaining*0.30,
- Alimentação:remaining*0.30,
- Rui:remaining*0.10,
- Oportunidades:remaining*0.10
- };
-
- db.emergency += db.budgets["Emergência"];
- db.wealth += db.budgets["Emergência"] + db.budgets["Investimento"];
-
- document.getElementById("transferBox").innerHTML=Object.entries(db.budgets).map(x=>"<p>"+x[0]+": €"+x[1].toFixed(2)+"</p>").join("");
- save();
-}
-
-function addExpense(){
- let v=parseFloat(document.getElementById("expenseValue").value||0);
- let c=document.getElementById("expenseCat").value;
- db.spent[c]=(db.spent[c]||0)+v;
- save();
-}
-
-function canBuy(){
- let v=parseFloat(document.getElementById("buyPrice").value||0);
- let c=document.getElementById("buyCat").value;
- let available=(db.budgets[c]||0)-(db.spent[c]||0);
- document.getElementById("buyResult").innerText=v<=available?
- "🟢 Sim. Restam €"+(available-v).toFixed(2):
- "🔴 Não. Disponível €"+available.toFixed(2);
-}
-
-function closeMonth(){
- let spent=Object.values(db.spent).reduce((a,b)=>a+b,0);
- db.history.unshift({date:new Date().toLocaleDateString(),income:db.income,spent:spent,saving:db.income-spent});
- db.income=0; db.spent={}; db.budgets={};
- save();
-}
-
-function exportBackup(){
- let blob=new Blob([JSON.stringify(db,null,2)],{type:"application/json"});
- let a=document.createElement("a");
- a.href=URL.createObjectURL(blob);
- a.download="10Moedas_Backup.json";
- a.click();
-}
-
-function importBackup(){
- let f=document.getElementById("importFile").files[0];
- let r=new FileReader();
- r.onload=e=>{db=JSON.parse(e.target.result);save();};
- r.readAsText(f);
-}
-
-function render(){
- let spent=Object.values(db.spent).reduce((a,b)=>a+b,0);
- let saldo=db.income-spent;
- let taxa=db.income>0?((saldo/db.income)*100):0;
-
- document.getElementById("dashboard").innerHTML=`
- <p>💰 Receita: €${db.income.toFixed(2)}</p>
- <p>💸 Despesas: €${spent.toFixed(2)}</p>
- <p>🏦 Saldo: €${saldo.toFixed(2)}</p>
- <p>📈 Taxa de Poupança: ${taxa.toFixed(1)}%</p>`;
-
- document.getElementById("eTxt").innerText=`€${db.emergency.toFixed(0)} / 5000`;
- document.getElementById("sTxt").innerText=`€${db.studio.toFixed(0)} / 3000`;
- document.getElementById("pTxt").innerText=`€${db.wealth.toFixed(0)} / 15000`;
-
- eBar.style.width=Math.min(100,db.emergency/5000*100)+"%";
- sBar.style.width=Math.min(100,db.studio/3000*100)+"%";
- pBar.style.width=Math.min(100,db.wealth/15000*100)+"%";
-
- history.innerHTML=db.history.map(h=>`<li>${h.date} | Receita €${h.income.toFixed(2)} | Saldo €${h.saving.toFixed(2)}</li>`).join("");
-}
-render();
-</script>
 </body>
 </html>
