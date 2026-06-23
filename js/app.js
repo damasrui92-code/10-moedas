@@ -117,10 +117,72 @@ function addSalary(){
     updateDashboard();
 }
 
+function addExpense(){
+
+    const value = Number(
+        document
+            .getElementById("expenseInput")
+            .value
+    );
+
+    if(!value || value <= 0){
+        alert("Valor inválido");
+        return;
+    }
+
+    const wallets =
+        Storage.load("dezMoedas.wallets");
+
+    const expenseCents =
+        Math.round(value * 100);
+
+    let remaining =
+        expenseCents;
+
+    wallets.forEach(wallet => {
+
+        if(remaining <= 0){
+            return;
+        }
+
+        const deduction =
+            Math.min(wallet.balance, remaining);
+
+        wallet.balance -= deduction;
+
+        remaining -= deduction;
+    });
+
+    Storage.save(
+        "dezMoedas.wallets",
+        wallets
+    );
+
+    let expenses =
+        Storage.load("dezMoedas.expenses") || 0;
+
+    expenses += expenseCents;
+
+    Storage.save(
+        "dezMoedas.expenses",
+        expenses
+    );
+
+    document.getElementById(
+        "expenseInput"
+    ).value = "";
+
+    renderWallets(wallets);
+    updateDashboard();
+}
+
 function updateDashboard(){
 
     const income =
         Storage.load("dezMoedas.income") || 0;
+
+    const expenses =
+        Storage.load("dezMoedas.expenses") || 0;
 
     const wallets =
         Storage.load("dezMoedas.wallets") || [];
@@ -135,6 +197,11 @@ function updateDashboard(){
         "incomeTotal"
     ).textContent =
         (income / 100).toFixed(2) + " €";
+
+    document.getElementById(
+        "expenseTotal"
+    ).textContent =
+        (expenses / 100).toFixed(2) + " €";
 
     document.getElementById(
         "netWorth"
