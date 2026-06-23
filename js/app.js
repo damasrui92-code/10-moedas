@@ -56,8 +56,6 @@ function renderWallets(wallets){
 }
 
 function addSalary(){
-alert("Botão funciona");
-    const value =
         Number(
             document
             .getElementById("salaryInput")
