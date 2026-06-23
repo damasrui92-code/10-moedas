@@ -56,11 +56,12 @@ function renderWallets(wallets){
 }
 
 function addSalary(){
-        Number(
-            document
+
+    Number(
+        document
             .getElementById("salaryInput")
             .value
-        );
+    );
 
     if(!value || value <= 0){
         alert("Valor inválido");
