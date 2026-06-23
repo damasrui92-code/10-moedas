@@ -57,7 +57,7 @@ function renderWallets(wallets){
 
 function addSalary(){
 
-    Number(
+    const value = Number(
         document
             .getElementById("salaryInput")
             .value
